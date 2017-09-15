@@ -6,7 +6,7 @@ import sys
 import pickle
 import matplotlib
 
-from numpy import mean
+import numpy
 from sklearn import preprocessing
 from sklearn.feature_selection import SelectKBest
 from sklearn.metrics import precision_score, recall_score
@@ -59,10 +59,10 @@ print "# POI: ", cnt
 
 ### check for missing values or NAN
 
-for pers in data_dict.values():
-    matplotlib.pyplot.scatter(pers['salary'],pers['long_term_incentive'])
-
-matplotlib.pyplot.show()
+#for pers in data_dict.values():
+#    matplotlib.pyplot.scatter(pers['salary'],pers['long_term_incentive'])
+#
+#matplotlib.pyplot.show()
 
 ### extreme outlier was identified earlier as a total row, which will be removed
 
@@ -127,11 +127,13 @@ my_features = features_list + ['fraction_from_poi',
                                'bonus',
                                'wealth']
 
+print "\n# of possible features: ", len(my_features)
+
 ### Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, my_features, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
-print "All features: ", my_features
+print "\nAll features: ", my_features
 
 #as per working with ratios above we will also look to scale on some features
 
@@ -140,22 +142,33 @@ scaler = preprocessing.MinMaxScaler() # this will transform each feature into a 
 features = scaler.fit_transform(features) 
 
 # K-best features
-k_best = SelectKBest(k=8)
+k_best = SelectKBest(k=5)
 k_best.fit(features, labels)
 
 results_list = zip(k_best.get_support(), my_features[1:], k_best.scores_)
 results_list = sorted(results_list, key=lambda x: x[2], reverse=True) # sort by k_best.scores
-print "K-best features:", results_list
+print "\nK-best features:", results_list
 
-## 8 best features chosen by SelectKBest
+xbar = []
+ybar = []
+for ele in results_list:
+    xbar.append(ele[1])
+    ybar.append(ele[2])
+
+matplotlib.pyplot.bar(numpy.arange(len(xbar)),ybar,align='center',alpha=0.5)
+
+matplotlib.pyplot.xticks(numpy.arange(len(xbar)),xbar,rotation=90)
+matplotlib.pyplot.ylabel('Score')
+matplotlib.pyplot.title('K-Best Scores')
+
+matplotlib.pyplot.show()
+
+## 6 best features chosen by SelectKBest
 my_features = features_list + ['exercised_stock_options',
                                'total_stock_value',
                                'bonus',
                                'salary',
-                               'fraction_to_poi',
-                               'wealth',
-                               'deferred_income',
-                               'long_term_incentive']
+                               'fraction_to_poi']
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
@@ -177,8 +190,8 @@ def test_clf(grid_search, features, labels, parameters, iterations=100):
 		recall = recall + [recall_score(labels_test, predictions)]
 		if iteration % 10 == 0:
 			sys.stdout.write('.')
-    print '\nPrecision:', mean(precision)
-    print 'Recall:', mean(recall)
+    print '\nPrecision:', numpy.mean(precision)
+    print 'Recall:', numpy.mean(recall)
     best_params = grid_search.best_estimator_.get_params()
     for param_name in sorted(parameters.keys()):
         print '%s=%r, ' % (param_name, best_params[param_name])
