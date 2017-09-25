@@ -70,10 +70,10 @@ del data_dict['TOTAL']
 
 ### AFTER
 
-# for pers in data_dict.values():
-    # matplotlib.pyplot.scatter(pers['salary'],pers['long_term_incentive'])
+for pers in data_dict.values():
+    matplotlib.pyplot.scatter(pers['salary'],pers['long_term_incentive'])
 
-# matplotlib.pyplot.show()
+matplotlib.pyplot.show()
 
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
